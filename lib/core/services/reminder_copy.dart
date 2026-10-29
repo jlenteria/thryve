@@ -6,6 +6,8 @@ class ReminderCopy {
   final String name;
   final String anchor;
 
+  static const String _lead = 'Take a few minutes of action today.';
+
   String get title => name.trim().isNotEmpty
       ? 'Hey ${name.trim()}, time to thryve 🌱'
       : 'Time to thryve 🌱';
@@ -21,14 +23,15 @@ class ReminderCopy {
     return 'Your future self will thank you.';
   }
 
-  String get body {
-    const String lead = 'Take a few minutes of action today.';
-    if (anchor.trim().isNotEmpty) {
-      return '$lead $highlight';
+  /// Everything in [body] before [highlight]. Exposed so the preview can
+  /// split without searching the assembled text: an anchor such as "today"
+  /// also occurs inside [_lead], and the search would land on that instead.
+  String get prefix {
+    if (anchor.trim().isEmpty && name.trim().isNotEmpty) {
+      return 'Take a few minutes of action today, ';
     }
-    if (name.trim().isNotEmpty) {
-      return 'Take a few minutes of action today, $highlight';
-    }
-    return '$lead $highlight';
+    return '$_lead ';
   }
+
+  String get body => '$prefix$highlight';
 }

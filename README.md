@@ -15,15 +15,45 @@ flutter run
 Requires Dart 3.12+ (Flutter stable). Checks:
 
 ```bash
-flutter analyze   # strict lint set in analysis_options.yaml
+flutter analyze   # flutter_lints + strict set in analysis_options.yaml
 flutter test
+dart format --output=none --set-exit-if-changed lib test
 ```
+
+CI (`.github/workflows/ci.yml`) runs the same three checks plus a debug
+Android build on every push and pull request.
+
+## Release
+
+Thryve is built by Bling. The application ID is `com.bling.thryve` on every
+platform.
+
+- **Android signing:** create `android/key.properties` (git-ignored) with
+  `storeFile`, `storePassword`, `keyAlias` and `keyPassword`. With it,
+  `flutter build appbundle` signs with your release key; without it the build
+  falls back to the debug key so local `--release` runs still work.
+- **Permissions:** Android declares `INTERNET` (remote Wall images) and
+  `POST_NOTIFICATIONS` (daily reminder). iOS asks for photo-library and
+  notification access. macOS has network-client and file-selection
+  entitlements.
+- **Backups:** Android cloud backup is disabled because all data is personal
+  and device-local.
 
 ## Architecture
 
-**Feature-first MVVM with Provider.** App-wide state lives in one
-`AppViewModel`; screens render it and forward input. Short-lived form state
-lives in screen-scoped view models or `StatefulWidget`s.
+**Feature-first MVVM with Provider.** `AppStore` owns loading and saving.
+Each feature has its own view model that sits next to its screen
+(`home_screen.dart` + `home_view_model.dart`), reads the slices of state it
+needs from the store, and writes back through it. A view model only notifies
+when one of its slices changes, so a Wall edit doesn't rebuild Goals.
+
+View models extend `ViewModel` (or `StoreViewModel` for store-backed features).
+Create them with `ChangeNotifierProvider(create: ...)` so Provider owns their
+disposal. Shared feature models live in `app.dart`; screen and sheet models
+live at their UI boundary. Render reactive content with `Consumer<T>` (or
+`Consumer2` for two dependencies), and use `context.read<T>()` in action handlers
+to access a model without subscribing to changes. Form controllers belong to
+the view model and are disposed with it.
 
 ```
 lib/
@@ -33,7 +63,7 @@ lib/
 │   ├── constants/            # storage keys, ids
 │   ├── extensions/           # context.colors / context.text / showSnack
 │   ├── services/             # NotificationService, ImageStore, ReminderCopy
-│   ├── state/                # AppViewModel (business rules), ViewModel base
+│   ├── state/                # AppStore (persistence), StoreViewModel, ViewModel
 │   ├── theme/                # color schemes (light + dark), ThemeData, ThemeManager
 │   ├── utils/                # dates, formatting, streak calculation
 │   └── widgets/              # cards, buttons, sheets, page scaffolds, images
@@ -47,12 +77,19 @@ lib/
     ├── goals/                # hub, detail, achievement, goal & milestone sheets
     ├── wall/                 # inspiration Wall and editor
     ├── review/               # weekly check-in + history
-    └── settings/             # profile, appearance, reminders, reset
+    ├── settings/             # profile, appearance, reminders, reset, about, privacy policy
+    └── support/              # optional tip QR
 ```
 
 | Layer | Responsibility |
 |-------|----------------|
-| `AppViewModel` | Profile, goals, milestones, practices, Wall, reviews, streak/activity, day rollover, reminder sync |
+| `AppStore` | Load/save, save-failure flag, day rollover, activity, image bookkeeping |
+| `GoalsViewModel` | Goals, milestones, earnings, level-up |
+| `HomeViewModel` | Daily practices, streak, featured Wall item |
+| `WallViewModel` | Wall items and pinning |
+| `SettingsViewModel` | Profile, reminders, reset |
+| `WeeklyReviewViewModel` | Week summary, past reviews, check-in form |
+| `OnboardingViewModel` | Onboarding steps; creates the profile and first goal |
 | `AppStateRepository` | One JSON document in SharedPreferences; serialized writes; corrupt data is backed up, never crashes |
 | `OnboardingViewModel` | Step navigation, validation, anchor image, reminder time |
 | `WeeklyReviewViewModel` | This week's rating and reflection form |

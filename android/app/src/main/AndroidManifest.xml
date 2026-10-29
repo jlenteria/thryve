@@ -1,8 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Wall images can be pasted as https URLs; debug/profile manifests
+         already declare this, so release builds need it too. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Required on Android 13+ for the daily reminder to be shown. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Lets the daily reminder fire on time; inexact alarms can be batched
+         and arrive many minutes late. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <!-- Goals, reflections and photos are personal and live only on the
+         device, so keep them out of cloud backups. -->
     <application
         android:label="Thryve"
         android:name="${applicationName}"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

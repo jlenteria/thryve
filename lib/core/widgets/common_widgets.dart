@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../motion/motion.dart';
+
 class ProgressBar extends StatelessWidget {
   const ProgressBar({super.key, required this.progress, this.height = 10});
 
@@ -10,13 +12,19 @@ class ProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(height),
-      child: LinearProgressIndicator(
-        value: progress.clamp(0.0, 1.0),
-        minHeight: height,
-        backgroundColor: colors.primary.withValues(alpha: 0.15),
-        valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+    // Fills from empty when first shown, then glides to each new value.
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: progress.clamp(0.0, 1.0)),
+      duration: Motion.of(context, Motion.slow),
+      curve: Motion.standard,
+      builder: (BuildContext context, double value, Widget? _) => ClipRRect(
+        borderRadius: BorderRadius.circular(height),
+        child: LinearProgressIndicator(
+          value: value,
+          minHeight: height,
+          backgroundColor: colors.primary.withValues(alpha: 0.15),
+          valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+        ),
       ),
     );
   }

@@ -8,12 +8,12 @@ abstract final class StreakCalculator {
     final DateTime today = now ?? DateTime.now();
     DateTime cursor = DateTime(today.year, today.month, today.day);
     if (!_isActive(activity, cursor)) {
-      cursor = cursor.subtract(const Duration(days: 1));
+      cursor = DateKeys.addDays(cursor, -1);
     }
     int streak = 0;
     while (_isActive(activity, cursor)) {
       streak++;
-      cursor = cursor.subtract(const Duration(days: 1));
+      cursor = DateKeys.addDays(cursor, -1);
     }
     return streak;
   }
@@ -33,7 +33,7 @@ abstract final class StreakCalculator {
       if (run > best) {
         best = run;
       }
-      cursor = cursor.add(const Duration(days: 1));
+      cursor = DateKeys.addDays(cursor, 1);
     }
     return best;
   }

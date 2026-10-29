@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../motion/entrance.dart';
+
 class ThryveCard extends StatelessWidget {
   const ThryveCard({
     super.key,
@@ -80,7 +82,7 @@ class CalloutCard extends StatelessWidget {
               color: colors.primary.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: colors.primary),
+            child: PopIn(child: Icon(icon, color: colors.primary)),
           ),
           const SizedBox(width: 12),
           Expanded(

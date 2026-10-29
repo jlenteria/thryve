@@ -1,12 +1,12 @@
 {
-    "name": "thryve",
-    "short_name": "thryve",
+    "name": "Thryve",
+    "short_name": "Thryve",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#006D41",
+    "theme_color": "#006D41",
+    "description": "Intentional progress anchored to your purpose.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

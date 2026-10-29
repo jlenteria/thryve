@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/state/app_view_model.dart';
-import '../../data/models/goal.dart';
-import 'screens/goal_achieved_screen.dart';
-import 'screens/goal_detail_screen.dart';
+import '../../core/motion/motion.dart';
+import '../../data/models/models.dart';
+import 'goal_achieved_screen.dart';
+import 'goal_detail_screen.dart';
+import 'goals_view_model.dart';
 import 'widgets/goal_form_sheet.dart';
 
 /// Navigation flows shared by Home, the Goals hub and the detail screens.
@@ -16,12 +17,17 @@ abstract final class GoalFlows {
         ),
       );
 
-  static Future<void> openAchieved(BuildContext context, String goalId) =>
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => GoalAchievedScreen(goalId: goalId),
-        ),
-      );
+  /// [celebrate] plays the confetti; leave it off when merely revisiting a
+  /// goal finished earlier.
+  static Future<void> openAchieved(
+    BuildContext context,
+    String goalId, {
+    bool celebrate = false,
+  }) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => GoalAchievedScreen(goalId: goalId, celebrate: celebrate),
+    ),
+  );
 
   /// Shows the celebration screen when an action just completed a goal.
   static Future<void> celebrateIf(
@@ -30,7 +36,8 @@ abstract final class GoalFlows {
     required String goalId,
   }) async {
     if (achieved && context.mounted) {
-      await openAchieved(context, goalId);
+      Haptics.medium();
+      await openAchieved(context, goalId, celebrate: true);
     }
   }
 
@@ -40,7 +47,7 @@ abstract final class GoalFlows {
     if (draft == null || !context.mounted) {
       return null;
     }
-    return context.read<AppViewModel>().createGoal(
+    return context.read<GoalsViewModel>().createGoal(
       title: draft.title,
       trackingType: draft.trackingType,
       targetAmount: draft.targetAmount,

@@ -8,7 +8,7 @@
 PRODUCT_NAME = thryve
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.thryve
+PRODUCT_BUNDLE_IDENTIFIER = com.bling.thryve
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.bling. All rights reserved.

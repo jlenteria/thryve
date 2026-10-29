@@ -1,56 +1,88 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../constants/app_constants.dart';
-import '../state/app_view_model.dart';
-import 'app_image.dart';
+import '../motion/entrance.dart';
+
+/// The app icon, as shown in the tab header.
+class ThryveLogo extends StatelessWidget {
+  const ThryveLogo({super.key, this.size = 32});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final int cacheSize = (size * MediaQuery.devicePixelRatioOf(context))
+        .round();
+    return Image.asset(
+      'assets/icons/thryve_icon.png',
+      width: size,
+      height: size,
+      cacheWidth: cacheSize,
+      cacheHeight: cacheSize,
+      excludeFromSemantics: true,
+      errorBuilder: (BuildContext context, Object error, StackTrace? stack) =>
+          Icon(
+            Icons.eco,
+            size: size,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+    );
+  }
+}
 
 /// Scaffold for the bottom-nav tabs: pinned brand header + padded content.
 class ThryveTabPage extends StatelessWidget {
-  const ThryveTabPage({super.key, required this.children, this.onAvatarTap});
+  const ThryveTabPage({super.key, required this.children});
 
   final List<Widget> children;
-  final VoidCallback? onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
-    final String? avatar = context.select<AppViewModel, String?>(
-      (AppViewModel app) => app.user.avatar,
-    );
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
             pinned: true,
             toolbarHeight: 64,
-            leadingWidth: 64,
             automaticallyImplyLeading: false,
-            leading: Center(
-              child: Semantics(
-                button: onAvatarTap != null,
-                label: 'Profile',
-                child: GestureDetector(
-                  onTap: onAvatarTap,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Avatar(source: avatar),
+            centerTitle: false,
+            titleSpacing: 16,
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const ThryveLogo(),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    AppConstants.appName,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-            title: Text(
-              AppConstants.appName,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            actions: const <Widget>[SizedBox(width: 64)],
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-            sliver: SliverList.list(children: children),
+            sliver: SliverList.list(
+              // Cards settle in one after another the first time a tab opens.
+              // The wrapper key tracks the card rather than its slot, so adding
+              // a card above doesn't replay or skip the ones below. A GlobalKey
+              // can't be reused here: the child still owns it, and one key on
+              // two widgets is a hard framework error.
+              children: <Widget>[
+                for (final (int index, Widget child) in children.indexed)
+                  Entrance(
+                    key: child.key is GlobalKey ? null : child.key,
+                    delay: Entrance.stagger(index),
+                    child: child,
+                  ),
+              ],
+            ),
           ),
         ],
       ),

@@ -10,6 +10,9 @@ class ViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
+  /// True once the screen is gone; async work should stop touching state.
+  bool get isDisposed => _isDisposed;
+
   @protected
   void startLoading() {
     if (_isLoading) {

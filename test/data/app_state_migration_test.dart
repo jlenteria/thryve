@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thryve/core/constants/app_constants.dart';
-import 'package:thryve/data/models/app_state.dart';
-import 'package:thryve/data/models/goal.dart';
-import 'package:thryve/data/models/milestone.dart';
+import 'package:thryve/data/models/models.dart';
 import 'package:thryve/data/repositories/app_state_repository.dart';
 
 /// Shape written by the previous build (schema v1).

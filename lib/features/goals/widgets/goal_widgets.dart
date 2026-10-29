@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/motion/entrance.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/thryve_card.dart';
-import '../../../data/models/goal.dart';
-import '../../../data/models/milestone.dart';
+import '../../../data/models/models.dart';
 
 /// Title, progress figure and bar for a goal. Used on Home and the Goals hub.
 class GoalProgressCard extends StatelessWidget {
@@ -56,11 +56,16 @@ class GoalProgressCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
-              Text(
-                goal.isFinancial
-                    ? Formatters.money(goal.currencySymbol, goal.currentAmount)
-                    : '${goal.progressPercent}% complete',
-                style: text.headlineMedium?.copyWith(color: colors.primary),
+              CountUp(
+                value: goal.isFinancial
+                    ? goal.currentAmount
+                    : goal.progressPercent.toDouble(),
+                builder: (BuildContext context, double value) => Text(
+                  goal.isFinancial
+                      ? Formatters.money(goal.currencySymbol, value)
+                      : '${value.round()}% complete',
+                  style: text.headlineMedium?.copyWith(color: colors.primary),
+                ),
               ),
               const Spacer(),
               if (goal.isFinancial)
@@ -107,6 +112,7 @@ class CompletedGoalTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
+    final DateTime completedAt = goal.achievedAt ?? goal.createdAt;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: ListTile(
@@ -121,8 +127,8 @@ class CompletedGoalTile extends StatelessWidget {
         ),
         title: Text(goal.title),
         subtitle: Text(
-          'Completed ${Formatters.longDate(goal.achievedAt!)} · '
-          '${Formatters.plural(goal.daysActive, 'day')}',
+          'Completed ${Formatters.longDate(completedAt)} · '
+          '${Formatters.plural(goal.daysActiveAt(completedAt), 'day')}',
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,

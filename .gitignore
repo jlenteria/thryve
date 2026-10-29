@@ -44,7 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 android/app/.cxx
-package.json
 .fvm/
 debug_symbols
 

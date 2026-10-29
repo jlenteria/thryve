@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thryve/app.dart';
 import 'package:thryve/core/constants/app_constants.dart';
-import 'package:thryve/core/state/app_view_model.dart';
 import 'package:thryve/core/widgets/buttons/primary_button.dart';
-import 'package:thryve/data/models/goal.dart';
+import 'package:thryve/data/models/models.dart';
+
+import 'support/harness.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues(<String, Object>{}));
@@ -67,23 +69,17 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{
       AppConstants.themeKey: ThemeMode.dark.name,
     });
-    final AppViewModel app = AppViewModel();
-    await app.load();
-    await app.completeOnboarding(
-      name: 'Alex',
-      dream: 'Build a studio',
-      anchor: 'My family',
-      reminderTime: const TimeOfDay(hour: 8, minute: 0),
-      remindersEnabled: false,
-    );
-    app.createGoal(
+    final Harness app = Harness();
+    await app.store.load();
+    await app.completeOnboarding();
+    app.goals.createGoal(
       title: 'Emergency fund',
       trackingType: GoalTrackingType.money,
       targetAmount: 5000,
     );
-    app.saveTask(title: 'Sketch');
+    app.home.saveTask(title: 'Sketch');
 
-    await tester.pumpWidget(ThryveApp(appViewModel: app));
+    await tester.pumpWidget(ThryveApp(store: app.store));
     await tester.pumpAndSettle();
 
     final BuildContext context = tester.element(find.text('Hello, Alex.'));
@@ -95,6 +91,61 @@ void main() {
       expect(tester.takeException(), isNull, reason: '$tab tab');
     }
     expect(find.text('Shape your Thryve experience.'), findsOneWidget);
+  });
+
+  testWidgets('About, Privacy policy and Support open from Settings', (
+    WidgetTester tester,
+  ) async {
+    await setPhoneSize(tester);
+    PackageInfo.setMockInitialValues(
+      appName: 'Thryve',
+      packageName: 'com.bling.thryve',
+      version: '1.0.0',
+      buildNumber: '1',
+      buildSignature: '',
+    );
+    final Harness app = Harness();
+    await app.store.load();
+    await app.completeOnboarding();
+
+    await tester.pumpWidget(ThryveApp(store: app.store));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings').last);
+    await tester.pumpAndSettle();
+
+    final Map<String, String> pages = <String, String>{
+      'About Thryve': 'Version 1.0.0 (1)',
+      'Privacy policy': 'Image links',
+      'Support Thryve': 'Never required. Thank you for using Thryve!',
+    };
+    for (final MapEntry<String, String> page in pages.entries) {
+      await tester.scrollUntilVisible(
+        find.text(page.key),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byType(CustomScrollView),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.tap(find.text(page.key));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text(page.value),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byType(ListView),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(find.text(page.value), findsOneWidget);
+      expect(tester.takeException(), isNull, reason: page.key);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+    }
   });
 
   testWidgets('primary button does not overflow in a narrow row', (

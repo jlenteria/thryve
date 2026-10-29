@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../motion/page_transitions.dart';
 import 'app_colors.dart';
 
 /// Builds Material 3 themes from [AppColorSchemes]. Both themes share one
@@ -35,6 +36,7 @@ abstract final class AppTheme {
       fontFamily: fontFamily,
       scaffoldBackgroundColor: colors.surface,
       textTheme: _textTheme(colors),
+      pageTransitionsTheme: thryvePageTransitions,
       appBarTheme: AppBarTheme(
         backgroundColor: colors.surface.withValues(alpha: 0.96),
         surfaceTintColor: Colors.transparent,
@@ -89,9 +91,7 @@ abstract final class AppTheme {
         focusedBorder: inputBorder.copyWith(
           borderSide: BorderSide(color: colors.primary, width: 2),
         ),
-        hintStyle: TextStyle(
-          color: colors.onSurfaceVariant.withValues(alpha: 0.6),
-        ),
+        hintStyle: TextStyle(color: colors.onSurfaceVariant),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colors.surface,

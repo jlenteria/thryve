@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../models/app_state.dart';
+import '../models/models.dart';
 
 /// Loads and saves [AppState] as a single JSON document in
 /// SharedPreferences. Writes are serialized so a slow write can never land
@@ -25,25 +25,34 @@ class AppStateRepository {
       // Never crash on corrupt local data; start fresh but keep the raw
       // payload so it can be recovered manually if needed.
       debugPrint('Thryve: could not read saved state ($error).');
-      await prefs.setString('${AppConstants.stateKey}.corrupt', encoded);
+      await prefs.setString(AppConstants.corruptStateKey, encoded);
       return const AppState();
     }
   }
 
-  Future<void> save(AppState state) {
+  /// Queues a write. The returned future completes with the outcome of this
+  /// write only; a failure never blocks later writes.
+  Future<void> save(AppState state) async {
+    // Encode synchronously so the snapshot matches the state at call time.
     final String encoded = jsonEncode(state.toJson());
-    return _pendingWrite = _pendingWrite.then((_) async {
+    final Future<void> write = _pendingWrite.then((_) async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(AppConstants.stateKey, encoded);
     });
+    // The queue itself must always resolve so one failure can't poison it.
+    _pendingWrite = write.then((_) {}, onError: (Object _) {});
+    await write;
   }
 
-  /// Completes once every queued write has reached disk.
+  /// Completes once every queued write has settled.
   Future<void> flush() => _pendingWrite;
 
+  /// Removes everything this repository owns, including the corrupt-data
+  /// backup, so a reset really erases the user's data.
   Future<void> clear() async {
     await _pendingWrite;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(AppConstants.stateKey);
+    await prefs.remove(AppConstants.corruptStateKey);
   }
 }

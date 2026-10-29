@@ -72,7 +72,7 @@ class CustomTextFormField extends StatelessWidget {
         hintStyle: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: colors.onSurface.withValues(alpha: 0.35),
+          color: colors.onSurfaceVariant,
         ),
         enabledBorder: border(colors.outlineVariant),
         focusedBorder: border(colors.primary, 1.5),

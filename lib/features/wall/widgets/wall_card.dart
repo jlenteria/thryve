@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/app_image.dart';
-import '../../../data/models/wall_item.dart';
+import '../../../data/models/models.dart';
 
 class WallCard extends StatelessWidget {
   const WallCard({

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/app_image.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/thryve_card.dart';
-import '../../../data/models/wall_item.dart';
+import '../../../data/models/models.dart';
 
 /// The pinned (or newest) Wall item, or a prompt to start the Wall.
 class FeaturedWallCard extends StatelessWidget {
@@ -41,7 +41,12 @@ class FeaturedWallCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          AppImage(source: item.image, height: 180, width: double.infinity),
+          AppImage(
+            source: item.image,
+            semanticLabel: item.title,
+            height: 180,
+            width: double.infinity,
+          ),
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(

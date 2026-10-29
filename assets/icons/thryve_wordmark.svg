@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" fill="none">
+  <title>Thryve wordmark</title>
+  <desc>The emerald growth monogram beside the Thryve name.</desc>
+  <g transform="translate(0 6) scale(.60)">
+    <path d="M250 226C184 226 140 187 140 126C204 126 250 164 250 226Z" fill="#006D41"/>
+    <path d="M266 206C266 141 308 98 376 98C376 162 333 206 266 206Z" fill="#006D41"/>
+    <path d="M229 246H283V316C283 343 296 354 319 354C333 354 346 350 358 343V392C344 400 326 404 306 404C255 404 229 374 229 323V246Z" fill="#006D41"/>
+  </g>
+  <text x="302" y="224" fill="#003920" font-family="Geist, Inter, Helvetica, Arial, sans-serif" font-size="174" font-weight="600" letter-spacing="-7">thryve</text>
+</svg>

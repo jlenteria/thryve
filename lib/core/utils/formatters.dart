@@ -6,6 +6,9 @@ abstract final class Formatters {
 
   /// `12000` → `12,000`; keeps up to two decimals when they matter.
   static String amount(double value) {
+    if (!value.isFinite) {
+      return '0';
+    }
     if (value == value.roundToDouble()) {
       return _amount.format(value.round());
     }
@@ -14,14 +17,24 @@ abstract final class Formatters {
 
   static String money(String symbol, double value) => '$symbol${amount(value)}';
 
+  /// Largest amount a user can enter. Keeps totals well inside the range
+  /// where `double` is exact for whole numbers and JSON-safe.
+  static const double maxAmount = 1e12;
+
+  /// Snaps a value to whole cents. Money is held in a `double`, and adding
+  /// decimal amounts drifts (ten `0.1` logs give `0.9999999999999999`), which
+  /// would let a goal sit at 100% forever without ever reaching its target.
+  static double roundToCents(double value) =>
+      (value * 100).roundToDouble() / 100;
+
   /// Parses user-typed amounts like `5,000` or ` 12.5 `. Returns null when
-  /// the text isn't a positive number.
+  /// the text isn't a positive, finite number within [maxAmount].
   static double? parseAmount(String text) {
     final double? value = double.tryParse(text.replaceAll(',', '').trim());
-    if (value == null || value.isNaN || value <= 0) {
+    if (value == null || !value.isFinite || value <= 0 || value > maxAmount) {
       return null;
     }
-    return value;
+    return roundToCents(value);
   }
 
   static String time(int hour, int minute) {
